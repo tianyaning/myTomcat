@@ -35,17 +35,6 @@ public class TomcatServerV3 {
                             System.out.println(msg);
                         }
 
-                        //根据请求找到对应的项目，并且调用相关的servlet
-                        //需要注意的是，servlet应该是在自己tomcat的webapps目录下，所以为了实现刚刚的功能，需要涉及到文件读取，url解析，类加载，反射等等
-
-                        //文件读取
-
-                        //url解析
-                        //接收到的请求： GET /servlet-demo-1.1/index HTTP/1.1
-                        //解析项目名称：/servlet-demo-1.1
-                        //解析servlet路径: /index
-
-
                         OutputStream outputStream = request.getOutputStream();
                         outputStream.write("HTTP/1.1 200 OK\r\n".getBytes());
                         outputStream.write("Content-Length: 11\r\n\r\n".getBytes());
