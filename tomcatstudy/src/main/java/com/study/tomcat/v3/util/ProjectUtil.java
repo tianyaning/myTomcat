@@ -4,11 +4,17 @@ import com.study.tomcat.v3.model.WebXml;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProjectUtil {
-    public void load() {
-        //TODO 路径需要自己补充
-        String webapps = "";
+    //加载所有项目
+    public static Map<String, WebXml> load() throws Exception {
+        Map<String, WebXml> configInfo = new HashMap<String, WebXml>();
+
+        //自己tomcat的项目部署路径
+        String webapps = "/Users/tianyaning/myTomcat/webapps";
+
         // 0,war包自动解压
 
         //1,webapps子文件夹算是一个项目
@@ -24,7 +30,10 @@ public class ProjectUtil {
 
             //3, 加载，把部署项目代码的class文件加载到jvm中
             webXml.loadServlet();
+            configInfo.put(projectFile.getName(), webXml);
         }
+
+        return configInfo;
     }
 
 //    public static void main(String[] args) {

@@ -1,7 +1,6 @@
 package com.study.tomcat.v3.model;
 
-import com.sun.jndi.toolkit.url.UrlUtil;
-
+import javax.servlet.Servlet;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
@@ -16,6 +15,9 @@ public class WebXml {
 
     //servlet映射
     public Map<String, String> servletMapping = new HashMap<String, String>();
+
+    //servlet实例集合
+    public Map<String, Servlet> servletInstances = new HashMap<String, Servlet>();
 
     public String getProjectPath() {
         return projectPath;
@@ -55,8 +57,10 @@ public class WebXml {
             Class<?> servletClass = servletClassLoader.loadClass(servletClassName);
 
             //2、反射实例化
-            Object o = servletClass.newInstance();
+            Servlet o = (Servlet) servletClass.newInstance();
 
+            //3、保存起来，以后要用
+            servletInstances.put(servletName, o);
 
         }
 
