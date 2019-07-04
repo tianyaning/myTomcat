@@ -4,8 +4,16 @@
         <servlet-name>servletDemo</servlet-name>
         <servlet-class>com.study.servlet.IndexServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>postServlet</servlet-name>
+        <servlet-class>com.study.servlet.PostServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>servletDemo</servlet-name>
         <url-pattern>/index</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>postServlet</servlet-name>
+        <url-pattern>/post</url-pattern>
     </servlet-mapping>
 </web-app>
