@@ -1,7 +1,9 @@
-package com.study.tomcat.v3;
+package com.study.tomcat.v4;
 
-import com.study.tomcat.v3.model.WebXml;
-import com.study.tomcat.v3.util.ProjectUtil;
+import com.study.tomcat.v4.model.WebXml;
+import com.study.tomcat.v4.util.ProjectUtil;
+import com.study.tomcat.v4.model.HttpRequest;
+import com.study.tomcat.v4.util.HttpParserUtil;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -17,14 +19,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class TomcatServerV3 {
+public class TomcatServerV4 {
     private static ExecutorService threadPool = Executors.newCachedThreadPool();
 
     public static void main(String[] args) throws Exception {
         // 启动之前要加载项目信息
         final Map<String, WebXml> configInfos = ProjectUtil.load();
 
-        ServerSocket serverSocket = new ServerSocket(8088);
+        final ServerSocket serverSocket = new ServerSocket(8088);
         System.out.println("tomcat服务器启动成功");
 
         while (!serverSocket.isClosed()) {
@@ -33,40 +35,29 @@ public class TomcatServerV3 {
             threadPool.execute(new Runnable() {
                 public void run() {
                     try {
-                        //接收数据&打印
-                        InputStream inputStream = request.getInputStream();
-                        System.out.println("收到请求：");
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"));
-                        String msg;
-                        while ((msg = reader.readLine()) != null) {
-                            if (msg.length() == 0) {
-                                break;
+                        HttpRequest httpRequest = HttpParserUtil.parseRequest(request.getInputStream());
+                        if (httpRequest != null) {
+                            String requestPath = httpRequest.getRequestPath();
+                            String path = requestPath.substring(1, requestPath.length());
+                            String projectName = path.split("/")[0];
+                            String projectPath = path.substring(projectName.length(), path.length());
+
+                            //根据请求，去找到对应的项目，并且调用相关servlet
+                            //根据url请求调用servlet的方法
+                            WebXml webXml = configInfos.get(projectName);
+                            if(webXml != null) {
+                                //解析项目名称:
+                                String servletName = webXml.servletMapping.get(projectPath);
+                                //解析请求servlet路径:
+                                Servlet servlet = webXml.servletInstances.get(servletName);
+
+                                //Servlet生命周期，调用doGet,doPost方法就会触发service方法。
+                                HttpServletRequest servletRequest = createRequest(httpRequest.getRequestMethod(), request, httpRequest.getMessagetBody());
+                                HttpServletResponse servletResponse = createResponse(request);
+                                //真正触发执行
+                                servlet.service(servletRequest, servletResponse);
                             }
-                            System.out.println(msg);
                         }
-
-                        //根据请求，去找到对应的项目，并且调用相关servlet
-                        //GET /servlet-demo-1.0.0/index HTTP/1.1
-                        //解析项目名称:/servlet-demo-1.0.0
-                        //解析请求servlet路径: /index
-                        //根据url请求调用servlet的方法
-                        WebXml webXml = configInfos.get("servlet-demo-1.0-SNAPSHOT");
-                        String servletName = webXml.servletMapping.get("/index");
-                        Servlet servlet = webXml.servletInstances.get(servletName);
-
-                        //Servlet生命周期，调用doGet,doPost方法就会触发service方法。
-                        HttpServletRequest servletRequest = createRequest();
-                        HttpServletResponse servletResponse = createResponse();
-                        //真正触发执行
-                        servlet.service(servletRequest, servletResponse);
-
-
-                        OutputStream outputStream = request.getOutputStream();
-                        outputStream.write("HTTP/1.1 200 OK\r\n".getBytes());
-                        outputStream.write("Content-Length: 11\r\n\r\n".getBytes());
-                        outputStream.write("Hello world".getBytes());
-                        outputStream.flush();
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -82,7 +73,7 @@ public class TomcatServerV3 {
         }
     }
 
-    private static HttpServletRequest createRequest() {
+    private static HttpServletRequest createRequest(final String method, final Socket request, final byte[] messageBody) {
         return new HttpServletRequest() {
             public String getAuthType() {
                 return null;
@@ -114,7 +105,7 @@ public class TomcatServerV3 {
 
             public String getMethod() {
                 //根据用户请求信息去解析
-                return "GET";
+                return method;
             }
 
             public String getPathInfo() {
@@ -222,7 +213,7 @@ public class TomcatServerV3 {
             }
 
             public int getContentLength() {
-                return 0;
+                return messageBody.length;
             }
 
             public String getContentType() {
@@ -230,7 +221,12 @@ public class TomcatServerV3 {
             }
 
             public ServletInputStream getInputStream() throws IOException {
-                return null;
+                return new ServletInputStream() {
+                    @Override
+                    public int read() throws IOException {
+                        return request.getInputStream().read();
+                    }
+                };
             }
 
             public String getParameter(String s) {
@@ -351,7 +347,7 @@ public class TomcatServerV3 {
         };
     }
 
-    private static HttpServletResponse createResponse() {
+    private static HttpServletResponse createResponse(final Socket request) {
         return new HttpServletResponse() {
             public void addCookie(Cookie cookie) {
 
@@ -449,7 +445,7 @@ public class TomcatServerV3 {
                 return new ServletOutputStream() {
                     @Override
                     public void write(int b) throws IOException {
-
+                        request.getOutputStream().write(b);
                     }
                 };
             }

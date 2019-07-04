@@ -1,9 +1,9 @@
-package com.study.tomcat.v3.util;
+package com.study.tomcat.v4.util;
 
 import java.io.*;
 import java.util.*;
 
-import com.study.tomcat.v3.model.WebXml;
+import com.study.tomcat.v4.model.WebXml;
 import org.dom4j.*;
 import org.dom4j.io.*;
 

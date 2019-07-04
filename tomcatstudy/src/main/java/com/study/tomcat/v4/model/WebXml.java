@@ -1,4 +1,4 @@
-package com.study.tomcat.v3.model;
+package com.study.tomcat.v4.model;
 
 import javax.servlet.Servlet;
 import java.io.File;
@@ -65,7 +65,6 @@ public class WebXml {
 
             //3、保存起来，以后要用
             servletInstances.put(servletName, o);
-
         }
 
 
