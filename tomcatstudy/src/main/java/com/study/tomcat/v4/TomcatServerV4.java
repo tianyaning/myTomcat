@@ -1,5 +1,6 @@
 package com.study.tomcat.v4;
 
+import com.study.servlet.PostServlet;
 import com.study.tomcat.v4.model.WebXml;
 import com.study.tomcat.v4.util.ProjectUtil;
 import com.study.tomcat.v4.model.HttpRequest;
@@ -49,8 +50,8 @@ public class TomcatServerV4 {
                                 //解析项目名称:
                                 String servletName = webXml.servletMapping.get(projectPath);
                                 //解析请求servlet路径:
-                                Servlet servlet = webXml.servletInstances.get(servletName);
-
+//                                Servlet servlet = webXml.servletInstances.get(servletName);
+                                Servlet servlet = new PostServlet();
                                 //Servlet生命周期，调用doGet,doPost方法就会触发service方法。
                                 HttpServletRequest servletRequest = createRequest(httpRequest.getRequestMethod(), request, httpRequest.getMessagetBody());
                                 HttpServletResponse servletResponse = createResponse(request);
@@ -221,10 +222,17 @@ public class TomcatServerV4 {
             }
 
             public ServletInputStream getInputStream() throws IOException {
+
                 return new ServletInputStream() {
+                    final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(messageBody);
                     @Override
                     public int read() throws IOException {
-                        return request.getInputStream().read();
+                        if (byteArrayInputStream.available() <= 0) {
+                            throw new EOFException();
+                        }
+                        return byteArrayInputStream.read();
+
+                        //                        return request.getInputStream().read();
                     }
                 };
             }

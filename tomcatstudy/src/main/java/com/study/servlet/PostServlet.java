@@ -16,13 +16,14 @@ public class PostServlet extends HttpServlet {
         byte[] array = new byte[inputstream.available()];
         inputstream.read(array);
 
-//        String name = new String(req.getParameter("name"));
-//        String age = new String(req.getParameter("age"));
+        //        String name = new String(req.getParameter("name"));
+        //        String age = new String(req.getParameter("age"));
         String response = "";
         response += "HTTP/1.1 200 OK\r\n";
         response += new String(array);
-//        response += "name = "+ name +"\n";
-//        response += "age = "+ age;
+        //        response += "name = "+ name +"\n";
+        //        response += "age = "+ age;
+        System.out.println(response);
         resp.getOutputStream().write(response.getBytes());
         resp.getOutputStream().flush();
     }
