@@ -234,6 +234,11 @@ public class TomcatServerV4 {
 
                         //                        return request.getInputStream().read();
                     }
+
+                    @Override
+                    public int available() {
+                        return byteArrayInputStream.available();
+                    }
                 };
             }
 

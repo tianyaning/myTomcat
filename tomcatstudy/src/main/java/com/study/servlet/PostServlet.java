@@ -20,6 +20,9 @@ public class PostServlet extends HttpServlet {
         //        String age = new String(req.getParameter("age"));
         String response = "";
         response += "HTTP/1.1 200 OK\r\n";
+        response += "Content-Type: text/xml\r\n";
+        response += "Content-Length: " + array.length + "\r\n";
+        response += "\r\n";
         response += new String(array);
         //        response += "name = "+ name +"\n";
         //        response += "age = "+ age;
